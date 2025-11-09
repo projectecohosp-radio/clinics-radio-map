@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Clinic Radio Map – Cleveland eHealth Research</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+  html,body,#map { height:100%; margin:0; padding:0; }
+  body { font-family: system-ui, Arial, sans-serif; }
+  h2 { text-align:center; margin:10px 0 4px; color:#16325c; }
+  p.subtitle { text-align:center; margin:0 0 8px; color:#555; font-size:14px; }
+  .pulse-dot { width: 18px; height: 18px; background: rgba(0,180,0,1); border-radius: 50%; border:2px solid white; position: relative; }
+  .pulse-dot::after { content:''; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:100%; height:100%; border-radius:50%; background: rgba(0,180,0,0.5); animation:pulse 1.8s infinite; }
+  @keyframes pulse { 0% { transform:translate(-50%,-50%) scale(0.7); opacity:0.9; } 70% { transform:translate(-50%,-50%) scale(2.3); opacity:0; } 100% { opacity:0; } }
+  .legend { background: rgba(255,255,255,0.95); padding:8px 10px; border-radius:6px; box-shadow:0 1px 4px rgba(0,0,0,0.2); font-size:13px; }
+  .legend .dot { display:inline-block; width:12px; height:12px; border-radius:50%; margin-right:6px; vertical-align:middle; }
+  .legend .green { background:#00b400; }
+  .legend .grey { background:#999; }
+  .top-bar { padding:8px 12px; background: #fff; border-bottom: 1px solid #eee; box-shadow: 0 1px 4px rgba(0,0,0,0.03); }
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <h2 style="margin:6px 0 0; font-size:18px;">Clinic Radio Map – A Digital Public Health & Nutrition Broadcast Outreach</h2>
+  <p style="margin:4px 0 6px; color:#444; font-size:13px;">by Cleveland eHealth Research — Empowering doctors and hospitals to reach citizens with credible health & nutrition messages.</p>
+</div>
+<div id="map"></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const clinics = [
+  { id: "DR001", name: "Dr Asha Clinic", doctor: "Dr. Asha Patel", lat: 19.07283, lon: 72.88261, active: true, city: "Mumbai", info: "Active Clinic Radio Kiosk" },
+  { id: "DR002", name: "City Cardiac Hospital", doctor: "Dr. R. Mehta", lat: 18.52043, lon: 73.85674, active: true, city: "Pune", info: "Active Hospital Radio Kiosk" },
+  { id: "DR003", name: "Metro Clinic", doctor: "Dr. K. Deshmukh", lat: 12.97194, lon: 77.59369, active: true, city: "Bengaluru", info: "Active Clinic Radio Kiosk" },
+  { id: "DR004", name: "Chennai Care Clinic", doctor: "Dr. S. Rao", lat: 13.08268, lon: 80.27072, active: false, city: "Chennai", info: "Pending activation" },
+  { id: "DR005", name: "Delhi Health Centre", doctor: "Dr. A. Sharma", lat: 28.6139, lon: 77.209, active: false, city: "Delhi", info: "Pending activation" },
+  { id: "DR006", name: "Kolkata Family Clinic", doctor: "Dr. R. Mukherjee", lat: 22.5726, lon: 88.3639, active: true, city: "Kolkata", info: "Active Clinic Radio Kiosk" },
+  { id: "DR007", name: "Hyderabad Life Hospital", doctor: "Dr. N. Kumar", lat: 17.385, lon: 78.4867, active: false, city: "Hyderabad", info: "Pending activation" }
+];
+
+function getParam(name) { const url = new URL(window.location.href); return url.searchParams.get(name); }
+const singleId = getParam('id');
+
+const map = L.map('map').setView([21,78], 5);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap contributors' }).addTo(map);
+
+function pulseIcon() { return L.divIcon({ className:'', html:'<div class="pulse-dot"></div>', iconSize:[18,18], iconAnchor:[9,9] }); }
+function greyIcon() { return L.divIcon({ className:'', html:'<div style="width:12px;height:12px;border-radius:50%;background:#999;border:2px solid white;"></div>', iconSize:[12,12], iconAnchor:[6,6] }); }
+
+const markers = [];
+clinics.forEach(cl => {
+  if (singleId && singleId !== cl.id) return;
+  const icon = cl.active ? pulseIcon() : greyIcon();
+  const marker = L.marker([cl.lat, cl.lon], {icon}).addTo(map);
+  marker.bindPopup(`<b>${cl.doctor}</b><br>${cl.name}<br>${cl.city}<br>Status: ${cl.info}<br><small>ID: ${cl.id}</small>`);
+  markers.push(marker);
+  if (singleId && singleId === cl.id) { marker.openPopup(); map.setView([cl.lat, cl.lon], 13); }
+});
+if (!singleId && markers.length > 0) { const group = L.featureGroup(markers); map.fitBounds(group.getBounds().pad(0.25)); }
+
+const legend = L.control({ position: 'topright' });
+legend.onAdd = function () {
+  const div = L.DomUtil.create('div', 'legend');
+  div.innerHTML = '<div><span class="dot green"></span> Active Clinic (blinking)</div>'+ '<div style="margin-top:6px;"><span class="dot grey"></span> Inactive / Pending</div>';
+  return div;
+};
+legend.addTo(map);
+</script>
+</body>
+</html>
