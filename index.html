@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8" />
 <title>Geospatial Health Broadcast</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 
-<!-- MapmyIndia SDK -->
+<!-- 🔑 MapmyIndia SDK (REPLACE API KEY) -->
 <script src="https://apis.mapmyindia.com/advancedmaps/v1/d5e4f2a0e993e99f66f292fe796c6769/map_load?v=1.5"></script>
 
 <style>
@@ -13,26 +13,24 @@ html, body {
   margin: 0;
   padding: 0;
   height: 100%;
-  font-family: Arial, sans-serif;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
-/* Top bar */
+/* Top header */
 .top-bar {
   height: 64px;
-  background: #0b4a7c;
+  background: #0b4f8a;
   color: #fff;
   padding: 10px 16px;
   box-sizing: border-box;
 }
-
 .top-bar h1 {
-  font-size: 20px;
   margin: 0;
+  font-size: 20px;
 }
-
 .top-bar p {
-  font-size: 13px;
   margin: 2px 0 0;
+  font-size: 13px;
   opacity: 0.9;
 }
 
@@ -42,22 +40,21 @@ html, body {
   height: calc(100vh - 64px);
 }
 
-/* Doctor label above pin */
+/* Doctor name label (above pin) */
 .doctor-label {
-  background: white;
-  border-radius: 4px;
+  background: #ffffff;
   padding: 4px 8px;
+  border-radius: 4px;
   font-size: 12px;
-  font-weight: 600;
-  color: #333;
-  border: 1px solid #ccc;
+  font-weight: 500;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.35);
   white-space: nowrap;
 }
 
-/* Mobile tweaks */
 @media (max-width: 768px) {
   .doctor-label {
     font-size: 11px;
+    padding: 3px 6px;
   }
 }
 </style>
@@ -65,11 +62,13 @@ html, body {
 
 <body>
 
+<!-- HEADER -->
 <div class="top-bar">
   <h1>Geospatial Health Broadcast</h1>
   <p>Patient Education & Public Health Awareness</p>
 </div>
 
+<!-- MAP -->
 <div id="map"></div>
 
 <script>
@@ -78,27 +77,29 @@ window.onload = function () {
   /* Detect mobile */
   var isMobile = window.innerWidth <= 768;
 
-  /* Shift map slightly right ONLY on mobile */
+  /* Shift map slightly right on mobile */
   var centerLat = 22.5;
   var centerLng = isMobile ? 83.0 : 80.5;
   var zoomLevel = 5;
 
+  /* Initialize map */
   var map = new MapmyIndia.Map("map", {
     center: [centerLat, centerLng],
     zoom: zoomLevel
   });
 
-  /* Fix mobile layout centering */
+  /* Fix mobile layout recalculation */
   setTimeout(function () {
     map.invalidateSize();
     map.setView([centerLat, centerLng], zoomLevel);
   }, 500);
 
-  /* Doctor icon */
-  var doctorIcon = L.icon({
-    iconUrl: "https://maps.mapmyindia.com/images/green.png",
-    iconSize: [30, 30],
-    iconAnchor: [15, 30]
+  /* ✅ LARGE, CLEAR GREEN PIN */
+  var greenPin = L.icon({
+    iconUrl: "https://maps.mapmyindia.com/images/marker_green.png",
+    iconSize: [34, 44],
+    iconAnchor: [17, 44],
+    popupAnchor: [0, -36]
   });
 
   /* Doctor data */
@@ -129,30 +130,30 @@ window.onload = function () {
   /* Add markers */
   doctors.forEach(function (doc) {
 
-    var marker = L.marker([doc.lat, doc.lng], {
-      icon: doctorIcon
-    }).addTo(map);
+    var marker = L.marker(
+      [doc.lat, doc.lng],
+      { icon: greenPin }
+    ).addTo(map);
 
-    /* Name ABOVE pin (permanent) */
+    /* Name ABOVE pin */
     marker.bindTooltip(
       doc.name + ", " + doc.speciality,
       {
         permanent: true,
         direction: "top",
-        offset: [0, -10],
+        offset: [0, -12],
         className: "doctor-label"
       }
     );
 
-    /* Click popup (full details) */
+    /* Click popup */
     marker.bindPopup(
-      "<b>" + doc.name + "</b><br>" +
-      "Speciality: " + doc.speciality + "<br>" +
-      "Location: " + doc.city + "<br><br>" +
-      "<b>Geospatial Health Broadcast</b>"
+      "<strong>" + doc.name + "</strong><br>" +
+      doc.speciality + "<br>" +
+      doc.city + "<br><br>" +
+      "<em>Geospatial Health Broadcast</em>"
     );
   });
-
 };
 </script>
 
