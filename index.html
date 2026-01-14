@@ -75,31 +75,31 @@ body{font-family:system-ui,Arial,sans-serif;}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-// -------- INDIA LOCK --------
-const indiaBounds = L.latLngBounds(
-  [6.5, 68.0],
-  [37.5, 97.5]
+// -------- SAFE INDIA-FOCUSED VIEW (NO CLIPPING) --------
+const indiaSoftBounds = L.latLngBounds(
+  [5.0, 60.0],     // South / Arabian Sea
+  [38.8, 105.0]    // Full North & East (J&K, Ladakh included)
 );
 
 // -------- MAP INIT --------
 const map = L.map('map',{
-  maxBounds: indiaBounds,
-  maxBoundsViscosity: 1.0,
+  maxBounds: indiaSoftBounds,
+  maxBoundsViscosity: 0.6,   // soft resistance (important)
   minZoom: 4,
   maxZoom: 18
-}).setView([22,80],5);
+}).setView([23.5, 82.0], 5);
 
+// -------- TILE LAYER (NO POLITICAL MASKING) --------
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
   attribution:'&copy; OpenStreetMap contributors'
 }).addTo(map);
 
-// -------- DATA (FULL) --------
+// -------- DATA --------
 const clinics = [
 {"id":"CR001","clinic":"Clinic 1","city":"Bengaluru","state":"Karnataka","lat":13.050391,"lon":77.627325,"status":"Non-Active"},
 {"id":"CR002","clinic":"Clinic 2","city":"Patna","state":"Bihar","lat":25.992841,"lon":85.392521,"status":"Non-Active"},
 {"id":"CR003","clinic":"Clinic 3","city":"Itanagar","state":"Arunachal Pradesh","lat":27.410749,"lon":93.709568,"status":"Non-Active"},
 {"id":"CR004","clinic":"Clinic 4","city":"Hyderabad","state":"Telangana","lat":17.718541,"lon":78.377346,"status":"Non-Active"},
-{"id":"CR005","clinic":"Clinic 5","city":"Cuttack","state":"Odisha","lat":19.980446,"lon":86.288284,"status":"Non-Active"},
 {"id":"CR009","clinic":"Clinic 9","city":"Ranchi","state":"Jharkhand","lat":23.389989,"lon":85.06023,"status":"Active"},
 {"id":"CR047","clinic":"Clinic 47","city":"Trivandrum","state":"Kerala","lat":8.026895,"lon":77.387473,"status":"Active"},
 {"id":"CR050","clinic":"Clinic 50","city":"Bhubaneswar","state":"Odisha","lat":20.271136,"lon":85.659078,"status":"Active"},
@@ -109,8 +109,12 @@ const clinics = [
 
 // -------- HELPERS --------
 function getParam(n){return new URL(window.location.href).searchParams.get(n);}
-function greenIcon(){return L.divIcon({html:'<div class="pulse-green"></div>',iconSize:[18,18],iconAnchor:[9,9]});}
-function redIcon(){return L.divIcon({html:'<div class="pulse-red"></div>',iconSize:[18,18],iconAnchor:[9,9]});}
+function greenIcon(){
+  return L.divIcon({className:'',html:'<div class="pulse-green"></div>',iconSize:[18,18],iconAnchor:[9,9]});
+}
+function redIcon(){
+  return L.divIcon({className:'',html:'<div class="pulse-red"></div>',iconSize:[18,18],iconAnchor:[9,9]});
+}
 
 // -------- MARKERS --------
 const singleId = getParam('id');
@@ -127,11 +131,14 @@ clinics.forEach(cl=>{
      Status: ${cl.status}`
   );
   markers.push(m);
-  if(singleId){map.setView([cl.lat,cl.lon],13);m.openPopup();}
+  if(singleId){
+    map.setView([cl.lat,cl.lon],13);
+    m.openPopup();
+  }
 });
 
 if(!singleId && markers.length){
-  map.fitBounds(L.featureGroup(markers).getBounds().pad(0.2));
+  map.fitBounds(L.featureGroup(markers).getBounds().pad(0.25));
 }
 
 // -------- LEGEND --------
