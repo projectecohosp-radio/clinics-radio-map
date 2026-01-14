@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Geospatial Health Broadcast</title>
 
-<!-- MapmyIndia JS SDK -->
+<!-- MapmyIndia JavaScript SDK -->
 <script src="https://apis.mapmyindia.com/advancedmaps/v1/d5e4f2a0e993e99f66f292fe796c6769/map_load?v=1.5"></script>
 
 <style>
@@ -19,25 +19,24 @@ body {
   font-family: system-ui, Arial, sans-serif;
 }
 
+/* Header */
 .top-bar {
   padding: 10px 14px;
   background: #ffffff;
   border-bottom: 1px solid #eaeaea;
 }
-
 .top-bar h1 {
   margin: 0;
   font-size: 18px;
   color: #16325c;
 }
-
 .top-bar p {
   margin: 4px 0 0;
   font-size: 13px;
   color: #555;
 }
 
-/* Pulsing markers */
+/* Marker styles */
 .pulse-green, .pulse-red {
   width: 18px;
   height: 18px;
@@ -45,30 +44,8 @@ body {
   border: 2px solid #ffffff;
   position: relative;
 }
-
 .pulse-green { background: #00b400; }
 .pulse-red { background: #d31e1e; }
-
-.pulse-green::after, .pulse-red::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  animation: pulse 1.6s infinite;
-}
-
-.pulse-green::after { background: rgba(0,180,0,0.45); }
-.pulse-red::after { background: rgba(220,30,30,0.45); }
-
-@keyframes pulse {
-  0% { transform: translate(-50%,-50%) scale(0.7); opacity: 0.9; }
-  70% { transform: translate(-50%,-50%) scale(2.3); opacity: 0; }
-  100% { opacity: 0; }
-}
 </style>
 </head>
 
@@ -82,7 +59,7 @@ body {
 <div id="map"></div>
 
 <script>
-// ================= MAP INIT =================
+/* ================= MAP INIT ================= */
 var map = new MapmyIndia.Map('map', {
   center: [23.5, 82.0],   // India center
   zoom: 5,
@@ -90,7 +67,7 @@ var map = new MapmyIndia.Map('map', {
   hybrid: false
 });
 
-// ================= DATA =================
+/* ================= CLINIC DATA ================= */
 var clinics = [
   { id:"CR001", clinic:"Clinic 1", city:"Bengaluru", state:"Karnataka", lat:13.050391, lon:77.627325, status:"Non-Active" },
   { id:"CR009", clinic:"Clinic 9", city:"Ranchi", state:"Jharkhand", lat:23.389989, lon:85.06023, status:"Active" },
@@ -99,12 +76,13 @@ var clinics = [
   { id:"CR060", clinic:"Clinic 60", city:"Coimbatore", state:"Tamil Nadu", lat:11.123285, lon:77.430725, status:"Active" }
 ];
 
-// ================= MARKERS =================
+/* ================= ADD MARKERS ================= */
 clinics.forEach(function(cl) {
 
-  var iconHTML = (cl.status === "Active")
-    ? '<div class="pulse-green"></div>'
-    : '<div class="pulse-red"></div>';
+  var iconHTML =
+    cl.status === "Active"
+      ? '<div class="pulse-green"></div>'
+      : '<div class="pulse-red"></div>';
 
   var marker = new MapmyIndia.Marker({
     map: map,
@@ -127,7 +105,6 @@ clinics.forEach(function(cl) {
         "Status: " + cl.status
     });
   });
-
 });
 </script>
 
