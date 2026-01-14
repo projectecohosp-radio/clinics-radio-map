@@ -3,141 +3,132 @@
 <head>
   <meta charset="utf-8" />
   <title>Geospatial Health Broadcast</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <!-- MapmyIndia SDK -->
+  <!-- MapmyIndia SDK (REPLACE YOUR_API_KEY_HERE) -->
   <script src="https://apis.mapmyindia.com/advancedmaps/v1/d5e4f2a0e993e99f66f292fe796c6769/map_load?v=1.5"></script>
-
-  <!-- Leaflet CSS -->
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  />
 
   <style>
     html, body {
-      height: 100%;
       margin: 0;
       padding: 0;
-      font-family: Arial, sans-serif;
+      height: 100%;
+      font-family: Arial, Helvetica, sans-serif;
     }
 
+    /* Top Header */
     .top-bar {
+      height: 64px;
+      background: #0b4f8a;
+      color: #ffffff;
       padding: 10px 16px;
-      background: #0f4c81;
-      color: #fff;
+      box-sizing: border-box;
     }
 
-    .top-bar h2 {
+    .top-bar h1 {
       margin: 0;
-      font-size: 18px;
+      font-size: 20px;
     }
 
     .top-bar p {
       margin: 2px 0 0;
-      font-size: 12px;
+      font-size: 13px;
       opacity: 0.9;
     }
 
+    /* Map container */
     #map {
       width: 100%;
-      height: calc(100% - 64px);
+      height: calc(100vh - 64px);
     }
 
-    /* Doctor name label */
+    /* Doctor name label near pin */
     .doctor-label {
-      background: rgba(255, 255, 255, 0.95);
-      border: 1px solid #bbb;
+      background: #ffffff;
+      padding: 4px 8px;
       border-radius: 4px;
-      padding: 2px 6px;
-      font-size: 11px;
-      font-weight: 600;
-      color: #1a3c6e;
+      font-size: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
       white-space: nowrap;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
     }
   </style>
 </head>
 
 <body>
 
-  <!-- Header -->
+  <!-- HEADER -->
   <div class="top-bar">
-    <h2>Geospatial Health Broadcast</h2>
+    <h1>Geospatial Health Broadcast</h1>
     <p>Patient Education & Public Health Awareness</p>
   </div>
 
-  <!-- Map -->
+  <!-- MAP -->
   <div id="map"></div>
 
-  <!-- Script -->
   <script>
     window.onload = function () {
 
-      // Initialize Map
+      /* Initialize map */
       var map = new MapmyIndia.Map("map", {
-        center: [23.5, 82.0],
-        zoom: 4.5
+        center: [22.5, 80.5],   // India center
+        zoom: 5
       });
 
-      // Doctor data
+      /* Mobile centering fix */
+      setTimeout(function () {
+        map.invalidateSize();
+        map.setView([22.5, 80.5], 5);
+      }, 500);
+
+      /* Doctor data */
       var doctors = [
         {
-          lat: 19.0760,
-          lng: 72.8777,
-          label: "Dr Shashank Joshi, Endocrinologist, Mumbai",
-          doctor: "Dr. Shashank Joshi",
-          clinic: "Dr Shashank Joshi Clinic",
-          status: "Active",
-          link: "#"
+          name: "Dr Shashank Joshi",
+          speciality: "Endocrinologist",
+          city: "Bandra, Mumbai",
+          lat: 19.0596,
+          lng: 72.8295
         },
         {
+          name: "Dr Rohit Baijal",
+          speciality: "Diabetologist",
+          city: "Hyderabad",
           lat: 17.3850,
-          lng: 78.4867,
-          label: "Dr Rohit Baijal,Diabetologist Hyderabad",
-          doctor: "Dr. Rohit Baijal",
-          clinic: "Baijal Diabetes Centre",
-          status: "Active",
-          link: "#"
+          lng: 78.4867
         },
         {
+          name: "Dr XYZ",
+          speciality: "Physician",
+          city: "Bengaluru",
           lat: 12.9716,
-          lng: 77.5946,
-          label: "Dr XYZ, Bengaluru",
-          doctor: "Dr. XYZ",
-          clinic: "XYZ Clinic",
-          status: "Non-Active",
-          link: "#"
+          lng: 77.5946
         }
       ];
 
-      // Add markers
-      doctors.forEach(function (d) {
+      /* Add markers */
+      doctors.forEach(function (doc) {
 
-        var marker = L.marker([d.lat, d.lng]).addTo(map);
+        var marker = L.marker([doc.lat, doc.lng]).addTo(map);
 
-        // Doctor name always visible
+        /* Always-visible label (name only) */
         marker.bindTooltip(
-          d.label,
+          doc.name + ", " + doc.city,
           {
             permanent: true,
-            direction: "top",
-            offset: [0, -12],
+            direction: "right",
+            offset: [10, 0],
             className: "doctor-label"
           }
         );
 
-        // Popup on click
+        /* Click popup (full details) */
         marker.bindPopup(
-          "<b>" + d.doctor + "</b><br>" +
-          "<b>Clinic:</b> " + d.clinic + "<br>" +
-          "<b>Status:</b> " + d.status + "<br>" +
-          "<a href='" + d.link + "' target='_blank'>▶ Visit Doctor Radio Page</a><br><br>" +
-          "Geospatial Health Broadcast"
+          "<strong>" + doc.name + "</strong><br>" +
+          doc.speciality + "<br>" +
+          doc.city + "<br><br>" +
+          "<em>Geospatial Health Broadcast</em>"
         );
       });
-
     };
   </script>
 
