@@ -3,45 +3,51 @@
 <head>
   <meta charset="utf-8" />
   <title>Geospatial Health Broadcast</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- MapmyIndia Advanced Maps SDK -->
-  <script src="https://apis.mapmyindia.com/advancedmaps/v1/d5e4f2a0e993e99f66f292fe796c6769/map_load?v=1.5"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <style>
     html, body {
       height: 100%;
       margin: 0;
       padding: 0;
-      font-family: system-ui, Arial, sans-serif;
+      font-family: Arial, sans-serif;
     }
-    #header {
+
+    .top-bar {
       padding: 10px 14px;
       background: #ffffff;
-      border-bottom: 1px solid #ddd;
+      border-bottom: 1px solid #e0e0e0;
     }
-    #header h1 {
+
+    .top-bar h1 {
       margin: 0;
       font-size: 18px;
       color: #16325c;
     }
-    #header p {
+
+    .top-bar p {
       margin: 4px 0 0;
       font-size: 13px;
       color: #555;
     }
+
     #map {
       width: 100%;
-      height: calc(100% - 70px);
+      height: calc(100% - 60px);
     }
   </style>
+
+  <!-- ✅ MapmyIndia Advanced Map SDK -->
+  <!-- 🔴 PASTE YOUR API KEY BELOW -->
+  <script src="https://apis.mapmyindia.com/advancedmaps/v1/d5e4f2a0e993e99f66f292fe796c6769/map_load?v=1.5"></script>
 </head>
 
 <body>
 
-  <div id="header">
+  <div class="top-bar">
     <h1>Geospatial Health Broadcast</h1>
-    <p>Patient Education & Public Health Awareness — Geo-mapped Clinic Broadcasts</p>
+    <p>Patient Education & Public Health Awareness — Geo-mapped Clinics</p>
   </div>
 
   <div id="map"></div>
@@ -49,36 +55,44 @@
   <script>
     window.onload = function () {
 
-      // Initialize Map
       var map = new MapmyIndia.Map("map", {
         center: [22.0, 80.0],
-        zoom: 5,
-        hybrid: false
+        zoom: 5
       });
 
-      // Sample clinic data (replace later with full list)
-      var clinics = [
-        { lat: 12.9716, lng: 77.5946, city: "Bengaluru", status: "Active" },
-        { lat: 19.0760, lng: 72.8777, city: "Mumbai", status: "Non-Active" },
-        { lat: 22.5726, lng: 88.3639, city: "Kolkata", status: "Active" },
-        { lat: 17.3850, lng: 78.4867, city: "Hyderabad", status: "Non-Active" }
-      ];
+      map.on("load", function () {
 
-      // Add markers
-      clinics.forEach(function (c) {
-        new MapmyIndia.Marker({
-          map: map,
-          position: { lat: c.lat, lng: c.lng },
-          popupHtml: "<b>" + c.city + "</b><br>Status: " + c.status,
-          icon: {
-            url: c.status === "Active"
-              ? "https://maps.mapmyindia.com/images/green.png"
-              : "https://maps.mapmyindia.com/images/red.png",
-            size: [30, 30]
-          }
+        var greenIcon = L.icon({
+          iconUrl: "https://maps.mapmyindia.com/images/green.png",
+          iconSize: [30, 30]
         });
-      });
 
+        var redIcon = L.icon({
+          iconUrl: "https://maps.mapmyindia.com/images/red.png",
+          iconSize: [30, 30]
+        });
+
+        var clinics = [
+          { lat: 12.9716, lng: 77.5946, city: "Bengaluru", status: "Active" },
+          { lat: 19.0760, lng: 72.8777, city: "Mumbai", status: "Non-Active" },
+          { lat: 22.5726, lng: 88.3639, city: "Kolkata", status: "Active" },
+          { lat: 17.3850, lng: 78.4867, city: "Hyderabad", status: "Non-Active" },
+          { lat: 8.5241,  lng: 76.9366, city: "Trivandrum", status: "Active" }
+        ];
+
+        clinics.forEach(function (c) {
+          L.marker([c.lat, c.lng], {
+            icon: c.status === "Active" ? greenIcon : redIcon
+          })
+          .addTo(map)
+          .bindPopup(
+            "<b>" + c.city + "</b><br>" +
+            "Status: " + c.status + "<br>" +
+            "Geospatial Health Broadcast"
+          );
+        });
+
+      });
     };
   </script>
 
