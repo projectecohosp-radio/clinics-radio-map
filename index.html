@@ -1,161 +1,139 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<title>Geospatial Health Broadcast</title>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8" />
+  <title>Geospatial Health Broadcast</title>
 
-<!-- 🔑 MapmyIndia SDK (REPLACE API KEY) -->
-<script src="https://apis.mapmyindia.com/advancedmaps/v1/d5e4f2a0e993e99f66f292fe796c6769/map_load?v=1.5"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-<style>
-html, body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  font-family: Arial, Helvetica, sans-serif;
-}
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
 
-/* Top header */
-.top-bar {
-  height: 64px;
-  background: #0b4f8a;
-  color: #fff;
-  padding: 10px 16px;
-  box-sizing: border-box;
-}
-.top-bar h1 {
-  margin: 0;
-  font-size: 20px;
-}
-.top-bar p {
-  margin: 2px 0 0;
-  font-size: 13px;
-  opacity: 0.9;
-}
+    .top-bar {
+      padding: 10px 14px;
+      background: #ffffff;
+      border-bottom: 1px solid #ddd;
+    }
 
-/* Map container */
-#map {
-  width: 100%;
-  height: calc(100vh - 64px);
-}
+    .top-bar h1 {
+      margin: 0;
+      font-size: 18px;
+      color: #16325c;
+    }
 
-/* Doctor name label (above pin) */
-.doctor-label {
-  background: #ffffff;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.35);
-  white-space: nowrap;
-}
+    .top-bar p {
+      margin: 4px 0 0;
+      font-size: 13px;
+      color: #555;
+    }
 
-@media (max-width: 768px) {
-  .doctor-label {
-    font-size: 11px;
-    padding: 3px 6px;
-  }
-}
-</style>
+    #map {
+      width: 100%;
+      height: calc(100% - 60px);
+    }
+
+    /* ✅ Doctor name label styling */
+    .doctor-label {
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid #bbb;
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #1a3c6e;
+      white-space: nowrap;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+    }
+  </style>
+
+  <!-- ✅ MapmyIndia JavaScript SDK (India-compliant) -->
+  <!-- 🔴 REPLACE API KEY BELOW -->
+  <script src="https://apis.mapmyindia.com/advancedmaps/v1/d5e4f2a0e993e99f66f292fe796c6769/map_load?v=1.5"></script>
 </head>
 
 <body>
 
-<!-- HEADER -->
-<div class="top-bar">
-  <h1>Geospatial Health Broadcast</h1>
-  <p>Patient Education & Public Health Awareness</p>
-</div>
+  <div class="top-bar">
+    <h1>Geospatial Health Broadcast</h1>
+    <p>Patient Education & Public Health Awareness — Doctor Radio Network</p>
+  </div>
 
-<!-- MAP -->
-<div id="map"></div>
+  <!-- MAP -->
+  <div id="map"></div>
 
-<script>
-window.onload = function () {
+  <script>
+    window.onload = function () {
 
-  /* Detect mobile */
-  var isMobile = window.innerWidth <= 768;
+      // Initialize map (India center)
+      var map = new MapmyIndia.Map("map", {
+        center: [22.0, 80.0],
+        zoom: 5
+      });
 
-  /* Shift map slightly right on mobile */
-  var centerLat = 22.5;
-  var centerLng = isMobile ? 83.0 : 80.5;
-  var zoomLevel = 5;
+      // Doctor data (sample – add as many as you want)
+      var doctors = [
+        {
+          lat: 19.0760,
+          lng: 72.8777,
+          label: "Dr Shashank Joshi, Endocrinologist, Mumbai",
+          doctor: "Dr. Shashank Joshi",
+          clinic: "Dr Shashank Joshi Clinic",
+          status: "Active",
+          link: "#"
+        },
+        {
+          lat: 17.3850,
+          lng: 78.4867,
+          label: "Dr Rohit Baijal,Diabetologist,  Hyderabad",
+          doctor: "Dr. Rohit Baijal",
+          clinic: "Baijal Diabetes Centre",
+          status: "Active",
+          link: "#"
+        },
+        {
+          lat: 12.9716,
+          lng: 77.5946,
+          label: "Dr ABC, Bengaluru",
+          doctor: "Dr. ABC",
+          clinic: "ABC Endocrine Clinic",
+          status: "Non-Active",
+          link: "#"
+        }
+      ];
 
-  /* Initialize map */
-  var map = new MapmyIndia.Map("map", {
-    center: [centerLat, centerLng],
-    zoom: zoomLevel
-  });
+      // Add markers
+      doctors.forEach(function (d) {
 
-  /* Fix mobile layout recalculation */
-  setTimeout(function () {
-    map.invalidateSize();
-    map.setView([centerLat, centerLng], zoomLevel);
-  }, 500);
+        var marker = L.marker([d.lat, d.lng]).addTo(map);
 
-  /* ✅ LARGE, CLEAR GREEN PIN */
-  var greenPin = L.icon({
-    iconUrl: "https://maps.mapmyindia.com/images/marker_green.png",
-    iconSize: [34, 44],
-    iconAnchor: [17, 44],
-    popupAnchor: [0, -36]
-  });
+        // ✅ Doctor name + area visible on map
+        marker.bindTooltip(
+          d.label,
+          {
+            permanent: true,
+            direction: "top",
+            offset: [0, -12],
+            className: "doctor-label"
+          }
+        );
 
-  /* Doctor data */
-  var doctors = [
-    {
-      name: "Dr Shashank Joshi",
-      speciality: "Endocrinologist",
-      city: "Bandra, Mumbai",
-      lat: 19.0596,
-      lng: 72.8295
-    },
-    {
-      name: "Dr Rohit Baijal",
-      speciality: "Diabetologist",
-      city: "Hyderabad",
-      lat: 17.3850,
-      lng: 78.4867
-    },
-    {
-      name: "Dr XYZ",
-      speciality: "Physician",
-      city: "Bengaluru",
-      lat: 12.9716,
-      lng: 77.5946
-    }
-  ];
+        // ✅ Full details on click
+        marker.bindPopup(
+          "<b>" + d.doctor + "</b><br>" +
+          "<b>Clinic:</b> " + d.clinic + "<br>" +
+          "<b>Status:</b> " + d.status + "<br>" +
+          "<a href='" + d.link + "' target='_blank'>▶ Visit Doctor Radio Page</a><br><br>" +
+          "Geospatial Health Broadcast"
+        );
+      });
 
-  /* Add markers */
-  doctors.forEach(function (doc) {
-
-    var marker = L.marker(
-      [doc.lat, doc.lng],
-      { icon: greenPin }
-    ).addTo(map);
-
-    /* Name ABOVE pin */
-    marker.bindTooltip(
-      doc.name + ", " + doc.speciality,
-      {
-        permanent: true,
-        direction: "top",
-        offset: [0, -12],
-        className: "doctor-label"
-      }
-    );
-
-    /* Click popup */
-    marker.bindPopup(
-      "<strong>" + doc.name + "</strong><br>" +
-      doc.speciality + "<br>" +
-      doc.city + "<br><br>" +
-      "<em>Geospatial Health Broadcast</em>"
-    );
-  });
-};
-</script>
+    };
+  </script>
 
 </body>
 </html>
