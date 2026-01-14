@@ -1,136 +1,160 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>Geospatial Health Broadcast</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="utf-8" />
+<title>Geospatial Health Broadcast</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- MapmyIndia SDK (REPLACE YOUR_API_KEY_HERE) -->
-  <script src="https://apis.mapmyindia.com/advancedmaps/v1/d5e4f2a0e993e99f66f292fe796c6769/map_load?v=1.5"></script>
+<!-- MapmyIndia SDK -->
+<script src="https://apis.mapmyindia.com/advancedmaps/v1/d5e4f2a0e993e99f66f292fe796c6769/map_load?v=1.5"></script>
 
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      font-family: Arial, Helvetica, sans-serif;
-    }
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: Arial, sans-serif;
+}
 
-    /* Top Header */
-    .top-bar {
-      height: 64px;
-      background: #0b4f8a;
-      color: #ffffff;
-      padding: 10px 16px;
-      box-sizing: border-box;
-    }
+/* Top bar */
+.top-bar {
+  height: 64px;
+  background: #0b4a7c;
+  color: #fff;
+  padding: 10px 16px;
+  box-sizing: border-box;
+}
 
-    .top-bar h1 {
-      margin: 0;
-      font-size: 20px;
-    }
+.top-bar h1 {
+  font-size: 20px;
+  margin: 0;
+}
 
-    .top-bar p {
-      margin: 2px 0 0;
-      font-size: 13px;
-      opacity: 0.9;
-    }
+.top-bar p {
+  font-size: 13px;
+  margin: 2px 0 0;
+  opacity: 0.9;
+}
 
-    /* Map container */
-    #map {
-      width: 100%;
-      height: calc(100vh - 64px);
-    }
+/* Map container */
+#map {
+  width: 100%;
+  height: calc(100vh - 64px);
+}
 
-    /* Doctor name label near pin */
-    .doctor-label {
-      background: #ffffff;
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 12px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
-      white-space: nowrap;
-    }
-  </style>
+/* Doctor label above pin */
+.doctor-label {
+  background: white;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #333;
+  border: 1px solid #ccc;
+  white-space: nowrap;
+}
+
+/* Mobile tweaks */
+@media (max-width: 768px) {
+  .doctor-label {
+    font-size: 11px;
+  }
+}
+</style>
 </head>
 
 <body>
 
-  <!-- HEADER -->
-  <div class="top-bar">
-    <h1>Geospatial Health Broadcast</h1>
-    <p>Patient Education & Public Health Awareness</p>
-  </div>
+<div class="top-bar">
+  <h1>Geospatial Health Broadcast</h1>
+  <p>Patient Education & Public Health Awareness</p>
+</div>
 
-  <!-- MAP -->
-  <div id="map"></div>
+<div id="map"></div>
 
-  <script>
-    window.onload = function () {
+<script>
+window.onload = function () {
 
-      /* Initialize map */
-      var map = new MapmyIndia.Map("map", {
-        center: [22.5, 80.5],   // India center
-        zoom: 5
-      });
+  /* Detect mobile */
+  var isMobile = window.innerWidth <= 768;
 
-      /* Mobile centering fix */
-      setTimeout(function () {
-        map.invalidateSize();
-        map.setView([22.5, 80.5], 5);
-      }, 500);
+  /* Shift map slightly right ONLY on mobile */
+  var centerLat = 22.5;
+  var centerLng = isMobile ? 83.0 : 80.5;
+  var zoomLevel = 5;
 
-      /* Doctor data */
-      var doctors = [
-        {
-          name: "Dr Shashank Joshi",
-          speciality: "Endocrinologist",
-          city: "Bandra, Mumbai",
-          lat: 19.0596,
-          lng: 72.8295
-        },
-        {
-          name: "Dr Rohit Baijal",
-          speciality: "Diabetologist",
-          city: "Hyderabad",
-          lat: 17.3850,
-          lng: 78.4867
-        },
-        {
-          name: "Dr XYZ",
-          speciality: "Physician",
-          city: "Bengaluru",
-          lat: 12.9716,
-          lng: 77.5946
-        }
-      ];
+  var map = new MapmyIndia.Map("map", {
+    center: [centerLat, centerLng],
+    zoom: zoomLevel
+  });
 
-      /* Add markers */
-      doctors.forEach(function (doc) {
+  /* Fix mobile layout centering */
+  setTimeout(function () {
+    map.invalidateSize();
+    map.setView([centerLat, centerLng], zoomLevel);
+  }, 500);
 
-        var marker = L.marker([doc.lat, doc.lng]).addTo(map);
+  /* Doctor icon */
+  var doctorIcon = L.icon({
+    iconUrl: "https://maps.mapmyindia.com/images/green.png",
+    iconSize: [30, 30],
+    iconAnchor: [15, 30]
+  });
 
-        /* Always-visible label (name only) */
-        marker.bindTooltip(
-          doc.name + ", " + doc.city,
-          {
-            permanent: true,
-            direction: "right",
-            offset: [18, 0],
-            className: "doctor-label"
-          }
-        );
+  /* Doctor data */
+  var doctors = [
+    {
+      name: "Dr Shashank Joshi",
+      speciality: "Endocrinologist",
+      city: "Bandra, Mumbai",
+      lat: 19.0596,
+      lng: 72.8295
+    },
+    {
+      name: "Dr Rohit Baijal",
+      speciality: "Diabetologist",
+      city: "Hyderabad",
+      lat: 17.3850,
+      lng: 78.4867
+    },
+    {
+      name: "Dr XYZ",
+      speciality: "Physician",
+      city: "Bengaluru",
+      lat: 12.9716,
+      lng: 77.5946
+    }
+  ];
 
-        /* Click popup (full details) */
-        marker.bindPopup(
-          "<strong>" + doc.name + "</strong><br>" +
-          doc.speciality + "<br>" +
-          doc.city + "<br><br>" +
-          "<em>Geospatial Health Broadcast</em>"
-        );
-      });
-    };
-  </script>
+  /* Add markers */
+  doctors.forEach(function (doc) {
+
+    var marker = L.marker([doc.lat, doc.lng], {
+      icon: doctorIcon
+    }).addTo(map);
+
+    /* Name ABOVE pin (permanent) */
+    marker.bindTooltip(
+      doc.name + ", " + doc.speciality,
+      {
+        permanent: true,
+        direction: "top",
+        offset: [0, -10],
+        className: "doctor-label"
+      }
+    );
+
+    /* Click popup (full details) */
+    marker.bindPopup(
+      "<b>" + doc.name + "</b><br>" +
+      "Speciality: " + doc.speciality + "<br>" +
+      "Location: " + doc.city + "<br><br>" +
+      "<b>Geospatial Health Broadcast</b>"
+    );
+  });
+
+};
+</script>
 
 </body>
 </html>
