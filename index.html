@@ -1,112 +1,86 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Geospatial Health Broadcast</title>
+  <meta charset="utf-8" />
+  <title>Geospatial Health Broadcast</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<!-- MapmyIndia JavaScript SDK -->
-<script src="https://apis.mapmyindia.com/advancedmaps/v1/d5e4f2a0e993e99f66f292fe796c6769/map_load?v=1.5"></script>
+  <!-- MapmyIndia Advanced Maps SDK -->
+  <script src="https://apis.mapmyindia.com/advancedmaps/v1/d5e4f2a0e993e99f66f292fe796c6769/map_load?v=1.5"></script>
 
-<style>
-html, body, #map {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  font-family: system-ui, Arial, sans-serif;
-}
-
-/* Header */
-.top-bar {
-  padding: 10px 14px;
-  background: #ffffff;
-  border-bottom: 1px solid #eaeaea;
-}
-.top-bar h1 {
-  margin: 0;
-  font-size: 18px;
-  color: #16325c;
-}
-.top-bar p {
-  margin: 4px 0 0;
-  font-size: 13px;
-  color: #555;
-}
-
-/* Marker styles */
-.pulse-green, .pulse-red {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  border: 2px solid #ffffff;
-  position: relative;
-}
-.pulse-green { background: #00b400; }
-.pulse-red { background: #d31e1e; }
-</style>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, Arial, sans-serif;
+    }
+    #header {
+      padding: 10px 14px;
+      background: #ffffff;
+      border-bottom: 1px solid #ddd;
+    }
+    #header h1 {
+      margin: 0;
+      font-size: 18px;
+      color: #16325c;
+    }
+    #header p {
+      margin: 4px 0 0;
+      font-size: 13px;
+      color: #555;
+    }
+    #map {
+      width: 100%;
+      height: calc(100% - 70px);
+    }
+  </style>
 </head>
 
 <body>
 
-<div class="top-bar">
-  <h1>Geospatial Health Broadcast</h1>
-  <p>Patient Education & Public Health Awareness — Geo-mapped Clinic Broadcasts</p>
-</div>
+  <div id="header">
+    <h1>Geospatial Health Broadcast</h1>
+    <p>Patient Education & Public Health Awareness — Geo-mapped Clinic Broadcasts</p>
+  </div>
 
-<div id="map"></div>
+  <div id="map"></div>
 
-<script>
-/* ================= MAP INIT ================= */
-var map = new MapmyIndia.Map('map', {
-  center: [23.5, 82.0],   // India center
-  zoom: 5,
-  zoomControl: true,
-  hybrid: false
-});
+  <script>
+    window.onload = function () {
 
-/* ================= CLINIC DATA ================= */
-var clinics = [
-  { id:"CR001", clinic:"Clinic 1", city:"Bengaluru", state:"Karnataka", lat:13.050391, lon:77.627325, status:"Non-Active" },
-  { id:"CR009", clinic:"Clinic 9", city:"Ranchi", state:"Jharkhand", lat:23.389989, lon:85.06023, status:"Active" },
-  { id:"CR047", clinic:"Clinic 47", city:"Trivandrum", state:"Kerala", lat:8.026895, lon:77.387473, status:"Active" },
-  { id:"CR050", clinic:"Clinic 50", city:"Bhubaneswar", state:"Odisha", lat:20.271136, lon:85.659078, status:"Active" },
-  { id:"CR060", clinic:"Clinic 60", city:"Coimbatore", state:"Tamil Nadu", lat:11.123285, lon:77.430725, status:"Active" }
-];
+      // Initialize Map
+      var map = new MapmyIndia.Map("map", {
+        center: [22.0, 80.0],
+        zoom: 5,
+        hybrid: false
+      });
 
-/* ================= ADD MARKERS ================= */
-clinics.forEach(function(cl) {
+      // Sample clinic data (replace later with full list)
+      var clinics = [
+        { lat: 12.9716, lng: 77.5946, city: "Bengaluru", status: "Active" },
+        { lat: 19.0760, lng: 72.8777, city: "Mumbai", status: "Non-Active" },
+        { lat: 22.5726, lng: 88.3639, city: "Kolkata", status: "Active" },
+        { lat: 17.3850, lng: 78.4867, city: "Hyderabad", status: "Non-Active" }
+      ];
 
-  var iconHTML =
-    cl.status === "Active"
-      ? '<div class="pulse-green"></div>'
-      : '<div class="pulse-red"></div>';
+      // Add markers
+      clinics.forEach(function (c) {
+        new MapmyIndia.Marker({
+          map: map,
+          position: { lat: c.lat, lng: c.lng },
+          popupHtml: "<b>" + c.city + "</b><br>Status: " + c.status,
+          icon: {
+            url: c.status === "Active"
+              ? "https://maps.mapmyindia.com/images/green.png"
+              : "https://maps.mapmyindia.com/images/red.png",
+            size: [30, 30]
+          }
+        });
+      });
 
-  var marker = new MapmyIndia.Marker({
-    map: map,
-    position: { lat: cl.lat, lng: cl.lon },
-    icon: {
-      html: iconHTML,
-      iconSize: [18,18],
-      iconAnchor: [9,9]
-    }
-  });
-
-  marker.addListener('click', function() {
-    new MapmyIndia.InfoWindow({
-      map: map,
-      position: { lat: cl.lat, lng: cl.lon },
-      content:
-        "<strong>" + cl.id + "</strong><br>" +
-        cl.clinic + "<br>" +
-        cl.city + ", " + cl.state + "<br>" +
-        "Status: " + cl.status
-    });
-  });
-});
-</script>
+    };
+  </script>
 
 </body>
 </html>
