@@ -38,7 +38,7 @@
     }
   </style>
 
-  <!-- ✅ MapmyIndia JavaScript SDK (India-compliant) -->
+  <!-- ✅ MapmyIndia JavaScript SDK (India-compliant map) -->
   <script src="https://apis.mapmyindia.com/advancedmaps/v1/d5e4f2a0e993e99f66f292fe796c6769/map_load?v=1.5"></script>
 </head>
 
@@ -52,7 +52,7 @@
   <!-- MAP CONTAINER -->
   <div id="map"></div>
 
-  <!-- MAP + MARKERS (CORRECT MAPMYINDIA METHOD) -->
+  <!-- MAP + MARKERS (SAFE DEFAULT MARKERS) -->
   <script>
     window.onload = function () {
 
@@ -62,18 +62,7 @@
         zoom: 5
       });
 
-      // Marker icons
-      var greenIcon = L.icon({
-        iconUrl: "https://maps.mapmyindia.com/images/green.png",
-        iconSize: [30, 30]
-      });
-
-      var redIcon = L.icon({
-        iconUrl: "https://maps.mapmyindia.com/images/red.png",
-        iconSize: [30, 30]
-      });
-
-      // Sample clinic data
+      // Clinic data (sample – you can expand to 75+ later)
       var clinics = [
         { lat: 12.9716, lng: 77.5946, city: "Bengaluru", status: "Active" },
         { lat: 19.0760, lng: 72.8777, city: "Mumbai", status: "Non-Active" },
@@ -82,17 +71,15 @@
         { lat: 8.5241,  lng: 76.9366, city: "Trivandrum", status: "Active" }
       ];
 
-      // Add markers
+      // Add markers (default Leaflet markers – no icons = no blank boxes)
       clinics.forEach(function (c) {
-        L.marker([c.lat, c.lng], {
-          icon: c.status === "Active" ? greenIcon : redIcon
-        })
-        .addTo(map)
-        .bindPopup(
-          "<b>" + c.city + "</b><br>" +
-          "Status: " + c.status + "<br>" +
-          "Geospatial Health Broadcast"
-        );
+        L.marker([c.lat, c.lng])
+          .addTo(map)
+          .bindPopup(
+            "<strong>" + c.city + "</strong><br>" +
+            "Status: " + c.status + "<br>" +
+            "Geospatial Health Broadcast"
+          );
       });
 
     };
