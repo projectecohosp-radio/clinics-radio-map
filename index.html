@@ -5,56 +5,69 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Geospatial Health Broadcast</title>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<!-- MapmyIndia JS SDK -->
+<script src="https://apis.mapmyindia.com/advancedmaps/v1/d5e4f2a0e993e99f66f292fe796c6769/map_load?v=1.5"></script>
 
 <style>
-html,body,#map{height:100%;margin:0;padding:0;}
-body{font-family:system-ui,Arial,sans-serif;}
-.top-bar{padding:10px 14px;background:#fff;border-bottom:1px solid #eee;}
-.top-bar h1{margin:0;font-size:18px;color:#16325c;}
-.top-bar p{margin:4px 0 0;color:#555;font-size:13px;}
-
-.pulse-green,.pulse-red{
-  width:18px;height:18px;border-radius:50%;
-  border:2px solid #fff;position:relative;
-}
-.pulse-green{background:#00b400;}
-.pulse-red{background:#d31e1e;}
-
-.pulse-green::after,.pulse-red::after{
-  content:'';
-  position:absolute;left:50%;top:50%;
-  transform:translate(-50%,-50%);
-  width:100%;height:100%;
-  border-radius:50%;
-  animation:pulse 1.6s infinite;
-}
-.pulse-green::after{background:rgba(0,180,0,.45);}
-.pulse-red::after{background:rgba(220,30,30,.45);}
-
-@keyframes pulse{
-  0%{transform:translate(-50%,-50%) scale(.7);opacity:.9;}
-  70%{transform:translate(-50%,-50%) scale(2.3);opacity:0;}
-  100%{opacity:0;}
+html, body, #map {
+  height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
-.legend{
-  background:rgba(255,255,255,.95);
-  padding:8px 10px;border-radius:6px;
-  box-shadow:0 1px 4px rgba(0,0,0,.15);
-  font-size:13px;
-}
-.legend .dot{
-  display:inline-block;width:12px;height:12px;
-  border-radius:50%;margin-right:8px;
+body {
+  font-family: system-ui, Arial, sans-serif;
 }
 
-.info-note{
-  position:absolute;left:14px;bottom:14px;
-  background:rgba(255,255,255,.95);
-  padding:8px 12px;border-radius:6px;
-  box-shadow:0 1px 6px rgba(0,0,0,.12);
-  font-size:13px;
+.top-bar {
+  padding: 10px 14px;
+  background: #ffffff;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.top-bar h1 {
+  margin: 0;
+  font-size: 18px;
+  color: #16325c;
+}
+
+.top-bar p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #555;
+}
+
+/* Pulsing markers */
+.pulse-green, .pulse-red {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+  position: relative;
+}
+
+.pulse-green { background: #00b400; }
+.pulse-red { background: #d31e1e; }
+
+.pulse-green::after, .pulse-red::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  animation: pulse 1.6s infinite;
+}
+
+.pulse-green::after { background: rgba(0,180,0,0.45); }
+.pulse-red::after { background: rgba(220,30,30,0.45); }
+
+@keyframes pulse {
+  0% { transform: translate(-50%,-50%) scale(0.7); opacity: 0.9; }
+  70% { transform: translate(-50%,-50%) scale(2.3); opacity: 0; }
+  100% { opacity: 0; }
 }
 </style>
 </head>
@@ -68,89 +81,54 @@ body{font-family:system-ui,Arial,sans-serif;}
 
 <div id="map"></div>
 
-<div class="info-note">
-  Share per-doctor link: <code>?id=CR001</code>
-</div>
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
 <script>
-// -------- SAFE INDIA-FOCUSED VIEW (NO CLIPPING) --------
-const indiaSoftBounds = L.latLngBounds(
-  [5.0, 60.0],     // South / Arabian Sea
-  [38.8, 105.0]    // Full North & East (J&K, Ladakh included)
-);
-
-// -------- MAP INIT --------
-const map = L.map('map',{
-  maxBounds: indiaSoftBounds,
-  maxBoundsViscosity: 0.6,   // soft resistance (important)
-  minZoom: 4,
-  maxZoom: 18
-}).setView([23.5, 82.0], 5);
-
-// -------- TILE LAYER (NO POLITICAL MASKING) --------
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-  attribution:'&copy; OpenStreetMap contributors'
-}).addTo(map);
-
-// -------- DATA --------
-const clinics = [
-{"id":"CR001","clinic":"Clinic 1","city":"Bengaluru","state":"Karnataka","lat":13.050391,"lon":77.627325,"status":"Non-Active"},
-{"id":"CR002","clinic":"Clinic 2","city":"Patna","state":"Bihar","lat":25.992841,"lon":85.392521,"status":"Non-Active"},
-{"id":"CR003","clinic":"Clinic 3","city":"Itanagar","state":"Arunachal Pradesh","lat":27.410749,"lon":93.709568,"status":"Non-Active"},
-{"id":"CR004","clinic":"Clinic 4","city":"Hyderabad","state":"Telangana","lat":17.718541,"lon":78.377346,"status":"Non-Active"},
-{"id":"CR009","clinic":"Clinic 9","city":"Ranchi","state":"Jharkhand","lat":23.389989,"lon":85.06023,"status":"Active"},
-{"id":"CR047","clinic":"Clinic 47","city":"Trivandrum","state":"Kerala","lat":8.026895,"lon":77.387473,"status":"Active"},
-{"id":"CR050","clinic":"Clinic 50","city":"Bhubaneswar","state":"Odisha","lat":20.271136,"lon":85.659078,"status":"Active"},
-{"id":"CR060","clinic":"Clinic 60","city":"Coimbatore","state":"Tamil Nadu","lat":11.123285,"lon":77.430725,"status":"Active"},
-{"id":"CR065","clinic":"Clinic 65","city":"Trivandrum","state":"Kerala","lat":8.443288,"lon":77.229627,"status":"Active"}
-];
-
-// -------- HELPERS --------
-function getParam(n){return new URL(window.location.href).searchParams.get(n);}
-function greenIcon(){
-  return L.divIcon({className:'',html:'<div class="pulse-green"></div>',iconSize:[18,18],iconAnchor:[9,9]});
-}
-function redIcon(){
-  return L.divIcon({className:'',html:'<div class="pulse-red"></div>',iconSize:[18,18],iconAnchor:[9,9]});
-}
-
-// -------- MARKERS --------
-const singleId = getParam('id');
-const markers = [];
-
-clinics.forEach(cl=>{
-  if(singleId && cl.id!==singleId) return;
-  const icon = cl.status==="Active"?greenIcon():redIcon();
-  const m = L.marker([cl.lat,cl.lon],{icon}).addTo(map);
-  m.bindPopup(
-    `<strong>${cl.id}</strong><br>
-     ${cl.clinic}<br>
-     ${cl.city}, ${cl.state}<br>
-     Status: ${cl.status}`
-  );
-  markers.push(m);
-  if(singleId){
-    map.setView([cl.lat,cl.lon],13);
-    m.openPopup();
-  }
+// ================= MAP INIT =================
+var map = new MapmyIndia.Map('map', {
+  center: [23.5, 82.0],   // India center
+  zoom: 5,
+  zoomControl: true,
+  hybrid: false
 });
 
-if(!singleId && markers.length){
-  map.fitBounds(L.featureGroup(markers).getBounds().pad(0.25));
-}
+// ================= DATA =================
+var clinics = [
+  { id:"CR001", clinic:"Clinic 1", city:"Bengaluru", state:"Karnataka", lat:13.050391, lon:77.627325, status:"Non-Active" },
+  { id:"CR009", clinic:"Clinic 9", city:"Ranchi", state:"Jharkhand", lat:23.389989, lon:85.06023, status:"Active" },
+  { id:"CR047", clinic:"Clinic 47", city:"Trivandrum", state:"Kerala", lat:8.026895, lon:77.387473, status:"Active" },
+  { id:"CR050", clinic:"Clinic 50", city:"Bhubaneswar", state:"Odisha", lat:20.271136, lon:85.659078, status:"Active" },
+  { id:"CR060", clinic:"Clinic 60", city:"Coimbatore", state:"Tamil Nadu", lat:11.123285, lon:77.430725, status:"Active" }
+];
 
-// -------- LEGEND --------
-const legend=L.control({position:'topright'});
-legend.onAdd=function(){
-  const d=L.DomUtil.create('div','legend');
-  d.innerHTML=
-    `<div><span class="dot" style="background:#00b400"></span> Active</div>
-     <div style="margin-top:6px"><span class="dot" style="background:#d31e1e"></span> Non-Active</div>`;
-  return d;
-};
-legend.addTo(map);
+// ================= MARKERS =================
+clinics.forEach(function(cl) {
+
+  var iconHTML = (cl.status === "Active")
+    ? '<div class="pulse-green"></div>'
+    : '<div class="pulse-red"></div>';
+
+  var marker = new MapmyIndia.Marker({
+    map: map,
+    position: { lat: cl.lat, lng: cl.lon },
+    icon: {
+      html: iconHTML,
+      iconSize: [18,18],
+      iconAnchor: [9,9]
+    }
+  });
+
+  marker.addListener('click', function() {
+    new MapmyIndia.InfoWindow({
+      map: map,
+      position: { lat: cl.lat, lng: cl.lon },
+      content:
+        "<strong>" + cl.id + "</strong><br>" +
+        cl.clinic + "<br>" +
+        cl.city + ", " + cl.state + "<br>" +
+        "Status: " + cl.status
+    });
+  });
+
+});
 </script>
 
 </body>
